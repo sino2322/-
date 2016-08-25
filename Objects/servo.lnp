@@ -1,0 +1,11 @@
+".\Objects\main.obj",
+".\Objects\schedule.obj",
+".\Objects\STARTUP.obj",
+".\Objects\delay.obj",
+".\Objects\servo.obj",
+".\Objects\Interpolation.obj",
+".\Objects\key.obj",
+".\Objects\LCD.obj",
+".\Objects\LED.obj" 
+TO ".\Objects\servo" 
+PRINT(".\Listings\servo.m51") RAMSIZE(256) 

@@ -1,0 +1,188 @@
+C51 COMPILER V9.53.0.0   INTERPOLATION                                                     08/25/2016 13:06:51 PAGE 1   
+
+
+C51 COMPILER V9.53.0.0, COMPILATION OF MODULE INTERPOLATION
+OBJECT MODULE PLACED IN .\Objects\Interpolation.obj
+COMPILER INVOKED BY: C:\Keil_v5\C51\BIN\C51.EXE USRLIB\Interpolation.c OPTIMIZE(8,SPEED) BROWSE INCDIR(.\LIB\INC;.\USRLI
+                    -B\INC;.\USR;.\USR\INC) DEBUG OBJECTEXTEND PRINT(.\Listings\Interpolation.lst) TABS(2) OBJECT(.\Objects\Interpolation.obj
+                    -)
+
+line level    source
+
+   1          #include <servo.h>
+   2          #include <Interpolation.h>
+   3          
+   4          
+   5          //x是基础一步,等同于basic_step,
+   6          int f,ye;
+   7          
+   8          int x,xe,y,y0,x0,ref_y,ref_x;
+   9          //直线插补的剩余步数
+  10          int line_destinaton,x_init_cnt,y_init_cnt;
+  11          int x_init_cnt_1,y_init_cnt_1;
+  12          
+  13          void draw_line(float a){
+  14   1        //only one time
+  15   1        //move to center
+  16   1        x_init_cnt=200;
+  17   1        y_init_cnt=200;
+  18   1        
+  19   1        while(x_init_cnt>0){
+  20   2          fast_step(0,1);
+  21   2          x_init_cnt--;
+  22   2        }
+  23   1        
+  24   1        while(y_init_cnt>0){
+  25   2          fast_step(1,1);
+  26   2          y_init_cnt--;
+  27   2        }
+  28   1        
+  29   1        line_destinaton=500;
+  30   1        //设定移动后的参考坐标系原点
+  31   1        ref_y=0;
+  32   1        ref_x=0;
+  33   1        
+  34   1        while(line_destinaton)
+  35   1        {
+  36   2          //x,y是当前参考坐标系,只为整
+  37   2          y=ref_y;
+  38   2          x=ref_x;
+  39   2          xe=ref_x;
+  40   2          ye=a*xe;
+  41   2          f=(y-y0)*(xe-x0)-(x-x0)*(ye-y0);
+  42   2          if(f<0){
+  43   3            //判别函数小于0,y+1
+  44   3            basic_step(1,1);
+  45   3            ref_y++;
+  46   3          } 
+  47   2          if(f>=0){
+  48   3            //判别函数大于等于0,x+1
+  49   3            basic_step(0,1);
+  50   3            ref_x++;
+  51   3          }
+  52   2          line_destinaton--;
+  53   2        }
+C51 COMPILER V9.53.0.0   INTERPOLATION                                                     08/25/2016 13:06:51 PAGE 2   
+
+  54   1      }
+  55          
+  56          
+  57          void draw_circle(){
+  58   1        int i_next,i_now;
+  59   1        int j_next,j_now;
+  60   1        int f_next,f_now;
+  61   1        
+  62   1        //run to (200,0)
+  63   1        //origin is (300,300)
+  64   1        x_init_cnt_1=500;
+  65   1        y_init_cnt_1=300;
+  66   1        
+  67   1        while(x_init_cnt_1>0){
+  68   2          fast_step(0,1);
+  69   2          x_init_cnt_1--;
+  70   2        }
+  71   1        
+  72   1        while(y_init_cnt_1>0){
+  73   2          fast_step(1,1);
+  74   2          y_init_cnt_1--;
+  75   2        }
+  76   1      
+  77   1        j_now=0;
+  78   1        i_now=200;
+  79   1        f_now=0;
+  80   1        
+  81   1        do{
+  82   2          if(f_now>=0){
+  83   3            //在圆外
+  84   3            if(j_now>=0){
+  85   4              if(i_now>=0){
+  86   5                //第一象限，含边沿
+  87   5                //x-移动
+  88   5                basic_step(0,0);
+  89   5                i_next=i_now-1;
+  90   5                f_next=f_now-2*i_now+1;
+  91   5              }
+  92   4              else{
+  93   5                //第二象限，含x负半轴
+  94   5                //y_移动
+  95   5                basic_step(1,0);
+  96   5                j_next=j_now-1;
+  97   5                f_next=f_now-2*j_now+1;
+  98   5              }
+  99   4            }
+ 100   3            else{
+ 101   4              if(i_now>=0){
+ 102   5                //第四象限，含y负半轴
+ 103   5                //y+移动
+ 104   5                basic_step(1,1);
+ 105   5                j_next=j_now+1;
+ 106   5                f_next=f_now+2*j_now+1;
+ 107   5              }
+ 108   4              else{
+ 109   5                //第三象限，无边沿
+ 110   5                //
+ 111   5                basic_step(0,1);
+ 112   5                i_next=i_now+1;
+ 113   5                f_next=f_now+2*i_now+1;
+ 114   5              }
+ 115   4            }
+C51 COMPILER V9.53.0.0   INTERPOLATION                                                     08/25/2016 13:06:51 PAGE 3   
+
+ 116   3          }
+ 117   2          //f<0
+ 118   2          //在圆内
+ 119   2          else{
+ 120   3            if(j_now>=0){
+ 121   4              if(i_now>=0){
+ 122   5                //第一象限，含边沿
+ 123   5                //y+移动
+ 124   5                basic_step(1,1);
+ 125   5                j_next=j_now+1;
+ 126   5                f_next=f_now+2*j_now+1;
+ 127   5              }
+ 128   4              else{
+ 129   5                //第二象限，含x负半轴
+ 130   5                //x-移动
+ 131   5                basic_step(0,0);
+ 132   5                i_next=i_now-1;
+ 133   5                f_next=f_now-2*i_now+1;
+ 134   5              }
+ 135   4            }
+ 136   3            else{
+ 137   4              if(i_now>=0){
+ 138   5                //第四象限，含y负半轴
+ 139   5                //x+移动
+ 140   5                basic_step(0,1);
+ 141   5                i_next=i_now+1;
+ 142   5                f_next=f_now+2*i_now+1;
+ 143   5              }
+ 144   4              else{
+ 145   5                //第三象限，无边沿
+ 146   5                //y-移动
+ 147   5                basic_step(1,0);
+ 148   5                j_next=j_now-1;
+ 149   5                f_next=f_now-2*j_now+1;
+ 150   5              }
+ 151   4            }
+ 152   3          }
+ 153   2          
+ 154   2          i_now=i_next;
+ 155   2          j_now=j_next;
+ 156   2          f_now=f_next;
+ 157   2          
+ 158   2        }while(i_now!=200);
+ 159   1      }
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    761    ----
+   CONSTANT SIZE    =   ----    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =     28      16
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

@@ -1,0 +1,87 @@
+C51 COMPILER V9.53.0.0   SERVO                                                             08/25/2016 13:06:51 PAGE 1   
+
+
+C51 COMPILER V9.53.0.0, COMPILATION OF MODULE SERVO
+OBJECT MODULE PLACED IN .\Objects\servo.obj
+COMPILER INVOKED BY: C:\Keil_v5\C51\BIN\C51.EXE USRLIB\servo.c OPTIMIZE(8,SPEED) BROWSE INCDIR(.\LIB\INC;.\USRLIB\INC;.\
+                    -USR;.\USR\INC) DEBUG OBJECTEXTEND PRINT(.\Listings\servo.lst) TABS(2) OBJECT(.\Objects\servo.obj)
+
+line level    source
+
+   1          #include <common.h>
+   2          
+   3          int basic_step_cnt=100;
+   4          int b_step_cnt,f_step_cnt;
+   5          
+   6          void init_8255_AO(){
+   7   1        com_8255=mode_8255;
+   8   1      }
+   9          
+  10          void run_a_step(int row,int dir,int speed){
+  11   1        if(row==1&&dir==0){
+  12   2          //y row move a step
+  13   2            //fan_zhuan flag
+  14   2            A_8255=0x01;
+  15   2            delay(speed);
+  16   2            A_8255=0x03;
+  17   2            delay(speed);
+  18   2            return;
+  19   2        }
+  20   1        if(row==1&&dir==1){
+  21   2            //zheng_zhuan flag
+  22   2            A_8255=0x00;
+  23   2            delay(speed);
+  24   2            A_8255=0x02;
+  25   2            delay(speed);
+  26   2          return;
+  27   2        }
+  28   1        if(row==0&&dir==0){
+  29   2          //x row move a step
+  30   2            //fan_zhuan flag
+  31   2            A_8255=0x04;
+  32   2            delay(speed);
+  33   2            A_8255=0x0c;
+  34   2            delay(speed);
+  35   2          return;
+  36   2        }
+  37   1        if(row==0&&dir==1){
+  38   2            //zheng_zhuan flag
+  39   2            A_8255=0x00;
+  40   2            delay(speed);
+  41   2            A_8255=0x08;
+  42   2            delay(speed);
+  43   2          return;
+  44   2        }
+  45   1      }
+  46          
+  47          //void real_step()
+  48          
+  49          void basic_step(int b_row,int b_dir){
+  50   1        for(b_step_cnt=basic_step_cnt;b_step_cnt>0;b_step_cnt--){
+  51   2            run_a_step(b_row,b_dir,10);
+  52   2            b_step_cnt--;
+  53   2        }
+  54   1      }
+C51 COMPILER V9.53.0.0   SERVO                                                             08/25/2016 13:06:51 PAGE 2   
+
+  55              
+  56          void fast_step(int f_row,int f_dir){
+  57   1        for(f_step_cnt=basic_step_cnt;f_step_cnt>0;f_step_cnt--){
+  58   2            run_a_step(f_row,f_dir,4);
+  59   2            f_step_cnt--;
+  60   2        }
+  61   1      }
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    279    ----
+   CONSTANT SIZE    =   ----    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =      6      14
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)
